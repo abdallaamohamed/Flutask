@@ -31,7 +31,7 @@ class _DashboardPageState extends State<DashboardPage> {
     if (isInitial) {
       context.read<TaskCategoryBloc>().add(InsertTaskCategory(
             taskCategoryItemEntity: TaskCategoryItemEntity(
-              title: "MAS",
+              title: "School",
               gradient: AppTheme.orangeGradient,
             ),
           ));
@@ -43,7 +43,7 @@ class _DashboardPageState extends State<DashboardPage> {
           ));
       context.read<TaskCategoryBloc>().add(InsertTaskCategory(
             taskCategoryItemEntity: TaskCategoryItemEntity(
-              title: "Learn",
+              title: "Health",
               gradient: AppTheme.purpleGradient,
             ),
           ));

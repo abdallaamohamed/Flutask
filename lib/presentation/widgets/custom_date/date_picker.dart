@@ -255,7 +255,7 @@ class _DatePickerDialog extends StatefulWidget {
 class _DatePickerDialogState extends State<_DatePickerDialog> {
   late DatePickerEntryMode _entryMode;
   late DateTime _selectedDate;
-  late bool _autoValidate;
+  AutovalidateMode _autovalidateMode = AutovalidateMode.disabled;
   final GlobalKey _calendarPickerKey = GlobalKey();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
@@ -264,14 +264,14 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
     super.initState();
     _entryMode = widget.initialEntryMode;
     _selectedDate = widget.initialDate;
-    _autoValidate = false;
+    AutovalidateMode _autovalidateMode = AutovalidateMode.disabled;
   }
 
   void _handleOk() {
     if (_entryMode == DatePickerEntryMode.input) {
       final FormState form = _formKey.currentState!;
       if (!form.validate()) {
-        setState(() => _autoValidate = true);
+        setState(() => _autovalidateMode = AutovalidateMode.always);
         return;
       }
       form.save();
@@ -287,7 +287,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
     setState(() {
       switch (_entryMode) {
         case DatePickerEntryMode.calendar:
-          _autoValidate = false;
+          AutovalidateMode _autovalidateMode = AutovalidateMode.disabled;
           _entryMode = DatePickerEntryMode.input;
           break;
         case DatePickerEntryMode.input:
@@ -320,6 +320,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
             return _inputLandscapeDialogSize;
         }
     }
+    return _calendarLandscapeDialogSize;
   }
 
   static final Map<LogicalKeySet, Intent> _formShortcutMap =
@@ -390,7 +391,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
       case DatePickerEntryMode.input:
         picker = Form(
           key: _formKey,
-          autovalidate: _autoValidate,
+          autovalidateMode: _autovalidateMode,
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 24),
             height: orientation == Orientation.portrait
@@ -431,8 +432,8 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
       titleStyle: dateStyle,
       orientation: orientation,
       isShort: orientation == Orientation.landscape,
-      icon: entryModeIcon,
-      iconTooltip: entryModeTooltip,
+      icon: Icons.calendar_today,
+      iconTooltip: localizations.calendarModeButtonLabel,
       onIconPressed: _handleEntryModeToggle,
     );
 
@@ -457,7 +458,17 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: <Widget>[
                       header,
-                      Expanded(child: picker),
+                      Expanded(
+                          child: CalendarDatePicker(
+                        key: _calendarPickerKey,
+                        initialDate: _selectedDate,
+                        firstDate: widget.firstDate,
+                        lastDate: widget.lastDate,
+                        currentDate: widget.currentDate,
+                        onDateChanged: _handleDateChanged,
+                        selectableDayPredicate: widget.selectableDayPredicate,
+                        initialCalendarMode: widget.initialCalendarMode,
+                      )),
                       actions,
                     ],
                   );
@@ -472,7 +483,18 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: <Widget>[
-                            Expanded(child: picker),
+                            Expanded(
+                                child: CalendarDatePicker(
+                              key: _calendarPickerKey,
+                              initialDate: _selectedDate,
+                              firstDate: widget.firstDate,
+                              lastDate: widget.lastDate,
+                              currentDate: widget.currentDate,
+                              onDateChanged: _handleDateChanged,
+                              selectableDayPredicate:
+                                  widget.selectableDayPredicate,
+                              initialCalendarMode: widget.initialCalendarMode,
+                            )),
                             actions,
                           ],
                         ),
@@ -518,7 +540,7 @@ class _DatePickerHeader extends StatelessWidget {
     required this.icon,
     required this.iconTooltip,
     required this.onIconPressed,
-  })   : assert(helpText != null),
+  })  : assert(helpText != null),
         assert(orientation != null),
         assert(isShort != null),
         super(key: key);
